@@ -1,43 +1,68 @@
 # Tutorial 1 – Arquitectura de Software (Django)
 
-## Descripción
-Este proyecto corresponde al **Tutorial 1 de Arquitectura de Software**, desarrollado con **Django**.  
-El objetivo es comprender y aplicar la arquitectura **Modelo–Vista–Template (MVT)**, creando una aplicación web básica que permite:
+Proyecto desarrollado como parte del Taller 1 de Arquitectura de Software, utilizando el framework Django y aplicando el patrón arquitectónico MVT (Model – View – Template).
 
-- Navegación entre páginas (Home, About, Products)
-- Creación de productos mediante formularios
-- Renderizado de vistas con templates
-- Uso de estilos estáticos
-- Persistencia básica con SQLite
-- Gestión del proyecto usando entorno virtual (`venv`)
+El proyecto fue construido de manera incremental, siguiendo estrictamente las actividades definidas en el documento guía del taller y manteniendo buenas prácticas de desarrollo y control de versiones con Git.
 
 ---
 
-## Tecnologías usadas
+## Descripción del proyecto
+
+La aplicación representa una tienda en línea básica, cuyo objetivo principal es comprender:
+
+- La estructura de un proyecto Django
+- El manejo de vistas, templates y rutas
+- El uso de formularios y validaciones
+- El flujo completo de una aplicación web
+- El control de versiones con Git y GitHub
+
+Este proyecto no persiste productos en base de datos, ya que el enfoque del taller es arquitectónico y no de persistencia.
+
+---
+
+## Arquitectura aplicada (MVT)
+
+El proyecto sigue el patrón MVT (Model – View – Template) de Django:
+
+### Model
+- Representado por estructuras simples (listas y diccionarios)
+- Simula los datos de productos
+
+### View
+- Maneja la lógica de negocio
+- Procesa peticiones HTTP
+- Valida datos
+- Controla el flujo de la aplicación
+
+### Template
+- Encargado únicamente de la presentación
+- Usa herencia de templates
+- Implementa condicionales y variables de contexto
+
+---
+
+## Tecnologías utilizadas
+
 - Python 3
 - Django
-- HTML
+- HTML (Django Templates)
 - CSS
-- SQLite
+- Bootstrap
+- SQLite (configuración por defecto de Django)
 - Git y GitHub
-- Entorno virtual (`venv`)
+- Entorno virtual (venv)
 
 ---
 
 ## Estructura del proyecto
 
 ```
-Tutorial-1-Arquitectura-De-Software/
-│
-├── .venv/                  # Entorno virtual (NO se sube a GitHub)
+.
+├── .venv/
 ├── helloworld/
 │   ├── helloworld_project/
-│   │   ├── settings.py
-│   │   ├── urls.py
-│   │   ├── asgi.py
-│   │   └── wsgi.py
-│   │
 │   ├── pages/
+│   │   ├── __pycache__/
 │   │   ├── migrations/
 │   │   ├── static/
 │   │   │   └── pages/
@@ -46,106 +71,108 @@ Tutorial-1-Arquitectura-De-Software/
 │   │   │   ├── pages/
 │   │   │   │   ├── base.html
 │   │   │   │   ├── home.html
-│   │   │   │   └── about.html
+│   │   │   │   ├── about.html
+│   │   │   │   └── contact.html
 │   │   │   └── products/
 │   │   │       ├── index.html
+│   │   │       ├── show.html
 │   │   │       ├── create.html
-│   │   │       └── show.html
-│   │   ├── views.py
-│   │   ├── urls.py
+│   │   │       └── created.html
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
 │   │   ├── models.py
-│   │   └── apps.py
-│   │
+│   │   ├── tests.py
+│   │   ├── urls.py
+│   │   └── views.py
 │   ├── db.sqlite3
 │   └── manage.py
-│
-├── requirements.txt
+├── .gitignore
 ├── README.md
-└── .gitignore
+└── requirements.txt
 ```
 
 ---
 
-## Arquitectura (MVT)
+## Funcionalidades implementadas
 
-- **Modelo (Model)**  
-  Definido en `models.py`. Representa la estructura de los datos.
-
-- **Vista (View)**  
-  Definida en `views.py`. Contiene la lógica que procesa las peticiones HTTP.
-
-- **Template**  
-  Archivos HTML ubicados en `templates/`. Se encargan de la presentación.
-
-Django gestiona internamente el controlador mediante el sistema de URLs.
+- Página Home
+- Página About
+- Página Contact
+- Listado de productos
+- Detalle de productos
+- Creación de productos mediante formulario
+- Validaciones de formulario
+- Confirmación de creación de producto
+- Navegación completa desde el menú
 
 ---
 
-## Instalación y ejecución
+## Cómo ejecutar el proyecto
 
 ### 1. Clonar el repositorio
-```bash
+```
 git clone <URL_DEL_REPOSITORIO>
-cd Tutorial-1-Arquitectura-De-Software
+cd tutorial-1-arquitectura
 ```
 
-### 2. Crear y activar entorno virtual
+### 2. Crear y activar el entorno virtual
 
-**Windows (PowerShell):**
-```powershell
+Linux / macOS:
+```
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Windows:
+```
 python -m venv .venv
 .venv\Scripts\activate
 ```
 
----
-
 ### 3. Instalar dependencias
-```bash
+```
 pip install -r requirements.txt
 ```
 
----
-
-### 4. Ejecutar migraciones
-```bash
-cd helloworld
-python manage.py migrate
+### 4. Ejecutar el servidor
 ```
-
----
-
-### 5. Ejecutar el servidor
-```bash
+cd helloworld
 python manage.py runserver
 ```
 
-Abrir en el navegador:
+### 5. Abrir en el navegador
 ```
 http://127.0.0.1:8000/
 ```
 
 ---
 
-## Funcionalidades implementadas
-- Página Home
-- Página About
-- Listado de productos
-- Creación de productos mediante formulario
-- Validación básica de formularios
-- Uso de templates base
-- Estilos CSS estáticos
-- Persistencia con SQLite
+## Control de versiones
+
+El proyecto utiliza Git siguiendo buenas prácticas:
+
+- Desarrollo por ramas (una por cada activity)
+- Commits con convención Conventional Commits
+- Historial limpio y trazable
+- Las ramas de actividades se conservan como evidencia del proceso
+
+Ejemplo de commit:
+```
+feat(products): add product created confirmation page
+```
 
 ---
 
-## Notas importantes
-- El entorno virtual `.venv` está excluido mediante `.gitignore`
-- El archivo `requirements.txt` permite replicar el entorno
-- El proyecto está listo para ser extendido con nuevas funcionalidades
+## Estado del proyecto
+
+- Todas las actividades del taller han sido completadas
+- El proyecto funciona correctamente
+- La arquitectura MVT está correctamente aplicada
+- El repositorio contiene el historial completo del desarrollo
 
 ---
 
 ## Autor
-Hever Andre Alfonso Jimenez
-Universidad EAFIT
-Proyecto desarrollado como parte del curso **Arquitectura de Software**.
+
+Hever Andre Alfonso Jimenez - Universidad EAFIT - Proyecto desarrollado como parte de un taller académico de Arquitectura de Software utilizando Django.
