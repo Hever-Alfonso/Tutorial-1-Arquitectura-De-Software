@@ -12,7 +12,11 @@
     <div class="col-md-8">
       <div class="card-body">
         <h5 class="card-title">
-          {{product.name}}
+          {% if product.price > 100 %}
+            <span class="text-danger">{{product.name}}</span>
+          {% else %}
+            {{product.name}}
+          {% endif %}
         </h5>
 
         <p class="card-text">
