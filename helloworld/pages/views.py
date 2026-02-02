@@ -2,6 +2,8 @@ from django import forms
 from django.shortcuts import render
 from django.views import View
 from django.views.generic import TemplateView
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 class HomePageView (TemplateView):
     template_name = 'pages/home.html'
@@ -41,6 +43,21 @@ class ProductShowView (View):
     template_name = 'products/show.html'
 
     def get(self, request, id):
+
+        # Intentar convertir el id a entero
+
+        try:
+            index = int(id) - 1
+        except ValueError:
+            return HttpResponseRedirect(reverse('home'))
+        
+        # Validar que el índice exista dentro de la lista
+        if index < 0 or index >= len(Product.products):
+            return HttpResponseRedirect(reverse('home'))
+        
+        # Si es válido, renderizar el producto
+        product = Product.products[index]
+        
         viewData = {}
         product = Product.products[int(id)-1]
         viewData["title"] = product["name"] + " - Online Store"
