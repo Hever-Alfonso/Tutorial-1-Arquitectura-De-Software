@@ -75,3 +75,15 @@ class ProductCreateView(View):
             viewData["title"] = "Create product"
             viewData["form"] = form
             return render(request, self.template_name, viewData)
+    
+class ContactPageView(TemplateView):
+    template_name = 'pages/contact.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Contact - Online Store"
+        context["subtitle"] = "Contact"
+        context["email"] = "contact@onlinestore.com"
+        context["address"] = "Calle falsa 123, Medellín, Antioquia"
+        context["phone"] = "+57 300 000 0000"
+        return context
