@@ -1,3 +1,4 @@
+
 # Tutorial 1 – Arquitectura de Software (Django)
 
 Proyecto desarrollado como parte del Taller 1 de Arquitectura de Software, utilizando el framework Django y aplicando el patrón arquitectónico MVT (Model – View – Template).
@@ -110,41 +111,64 @@ El proyecto sigue el patrón MVT (Model – View – Template) de Django:
 
 ## Cómo ejecutar el proyecto
 
-### 1. Clonar el repositorio
-```
+### Opción 1: Entorno virtual (venv)
+
+1. Clonar el repositorio
+```bash
 git clone <URL_DEL_REPOSITORIO>
 cd tutorial-1-arquitectura
 ```
 
-### 2. Crear y activar el entorno virtual
+2. Crear y activar el entorno virtual
 
 Linux / macOS:
-```
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
 Windows:
-```
+```bash
 python -m venv .venv
 .venv\Scripts\activate
 ```
 
-### 3. Instalar dependencias
-```
+3. Instalar dependencias
+```bash
 pip install -r requirements.txt
 ```
 
-### 4. Ejecutar el servidor
-```
+4. Ejecutar el servidor
+```bash
 cd helloworld
 python manage.py runserver
 ```
 
-### 5. Abrir en el navegador
+5. Abrir en el navegador
 ```
 http://127.0.0.1:8000/
 ```
+
+---
+
+### Opción 2: Docker y Docker Compose
+
+Este proyecto también puede ejecutarse mediante contenedores, usando Docker.
+
+1. Asegúrate de tener instalado:
+   - Docker
+   - Docker Compose
+
+2. Desde la raíz del proyecto, ejecutar:
+```bash
+docker-compose up --build
+```
+
+3. Acceder en el navegador:
+- Aplicación Django: [http://localhost:8000](http://localhost:8000)
+- pgAdmin: [http://localhost:5050](http://localhost:5050)
+   - Email: `admin@admin.com`
+   - Contraseña: `admin`
 
 ---
 

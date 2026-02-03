@@ -25,7 +25,16 @@ SECRET_KEY = 'django-insecure-vlpv1ciy1_f(*@&wt+(zsj&@qs_f%#3ew*f*j^#!+wl(sd8yns
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ------------------------------------------------------------
+# Docker note:
+# When running Django inside Docker, requests may come from
+# different hostnames (e.g. localhost, container name, etc.).
+# Using ["*"] avoids host blocking issues in a demo / learning
+# environment and allows the app to run without extra setup.
+#
+# WARNING: This is NOT recommended for production use.
+# ------------------------------------------------------------
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -37,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'pages', # app agregada
+    'pages',  # app agregada
 ]
 
 MIDDLEWARE = [
@@ -73,10 +82,23 @@ WSGI_APPLICATION = 'helloworld_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+# ------------------------------------------------------------
+# Docker note (SQLite persistence):
+# Docker containers are ephemeral, meaning files stored inside
+# the container filesystem can be lost when the container is
+# recreated.
+#
+# To ensure SQLite data persists across container restarts,
+# the database file is stored under BASE_DIR / 'data', which
+# is mounted as a Docker volume via docker-compose.yml.
+# ------------------------------------------------------------
+SQLITE_DIR = BASE_DIR / 'data'
+SQLITE_DIR.mkdir(exist_ok=True)
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': SQLITE_DIR / 'db.sqlite3',
     }
 }
 
