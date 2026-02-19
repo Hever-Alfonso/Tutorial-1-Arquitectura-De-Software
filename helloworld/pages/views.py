@@ -1,17 +1,24 @@
-from django import forms
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import TemplateView, ListView
 from django.views import View
-from django.views.generic import TemplateView
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django import forms
+from django.core.exceptions import ValidationError
 
-class HomePageView (TemplateView):
+# Importamos el modelo Product desde la base de datos
+# Ya no usamos la clase Product con lista hardcodeada
+from .models import Product
+
+
+class HomePageView(TemplateView):
     template_name = 'pages/home.html'
 
-class AboutPageView (TemplateView):
+
+class AboutPageView(TemplateView):
     template_name = 'pages/about.html'
 
-    def get_context_data (self, **kwargs):
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
             "titile": "About us - Online Store",
@@ -20,14 +27,7 @@ class AboutPageView (TemplateView):
             "author": "Developed by: Hever Andre Alfonso Jimenez"
         })
         return context
-    
-class Product:
-    products = [
-        {"id":"1", "name":"TV", "description":"Best TV", "price": 200},
-        {"id":"2", "name":"iPhone", "description":"Best iPhone", "price": 999},
-        {"id":"3", "name":"Chromecast", "description":"Best Chromecast", "price": 80},
-        {"id":"4", "name":"Glasses", "description":"Best Glasses", "price": 120}
-    ]
+
 
 class ProductIndexView(View):
     template_name = 'products/index.html'
@@ -36,44 +36,54 @@ class ProductIndexView(View):
         viewData = {}
         viewData["title"] = "Products - Online Store"
         viewData["subtitle"] = "List of products"
-        viewData["products"] = Product.products
+        # Antes: Product.products (lista hardcodeada)
+        # Ahora: consultamos todos los productos reales de la base de datos
+        viewData["products"] = Product.objects.all()
         return render(request, self.template_name, viewData)
 
-class ProductShowView (View):
+
+class ProductShowView(View):
     template_name = 'products/show.html'
 
     def get(self, request, id):
-
-        # Intentar convertir el id a entero
-
         try:
-            index = int(id) - 1
-        except ValueError:
+            product_id = int(id)
+            if product_id < 1:
+                raise ValueError("Product id must be 1 or greater")
+            # Antes: buscabamos en la lista hardcodeada por indice
+            # Ahora: buscamos en la BD por primary key, retorna 404 si no existe
+            product = get_object_or_404(Product, pk=product_id)
+        except (ValueError, IndexError):
             return HttpResponseRedirect(reverse('home'))
-        
-        # Validar que el índice exista dentro de la lista
-        if index < 0 or index >= len(Product.products):
-            return HttpResponseRedirect(reverse('home'))
-        
-        # Si es válido, renderizar el producto
-        product = Product.products[index]
-        
+
         viewData = {}
-        product = Product.products[int(id)-1]
-        viewData["title"] = product["name"] + " - Online Store"
-        viewData["subtitle"] = product["name"] + " - Product information"
+        product = get_object_or_404(Product, pk=product_id)
+        viewData["title"] = product.name + " - Online Store"
+        viewData["subtitle"] = product.name + " - Product information"
         viewData["product"] = product
         return render(request, self.template_name, viewData)
 
-class ProductForm(forms.Form):
-    name = forms.CharField(required=True)
-    price = forms.FloatField(required=True)
+
+class ProductForm(forms.ModelForm):
+    """
+    Formulario basado en el modelo Product.
+    Antes usaba forms.Form con campos manuales.
+    Ahora usa ModelForm que los toma directamente del modelo.
+    """
+
+    class Meta:
+        # Le indica a Django que modelo usar para generar el formulario
+        model = Product
+        # Solo mostramos estos dos campos en el formulario
+        fields = ['name', 'price']
 
     def clean_price(self):
-        price = self.cleaned_data.get("price")
-        if price is None or price <= 0:
-            raise forms.ValidationError("Price must be greater than 0.")
+        # Validacion: el precio debe ser mayor que cero
+        price = self.cleaned_data.get('price')
+        if price is not None and price <= 0:
+            raise ValidationError('Price must be greater than zero.')
         return price
+
 
 class ProductCreateView(View):
     template_name = 'products/create.html'
@@ -84,21 +94,39 @@ class ProductCreateView(View):
         viewData["title"] = "Create product"
         viewData["form"] = form
         return render(request, self.template_name, viewData)
-    
+
     def post(self, request):
         form = ProductForm(request.POST)
         if form.is_valid():
-            viewData = {}
-            viewData["title"] = "Product Created"
-            viewData["subtitle"] = "Product Created Successfully"
-            viewData["product"] = form.cleaned_data
-            return render(request, "products/show.html", viewData)
+            # Antes: no guardaba nada en la BD
+            # Ahora: form.save() guarda el producto nuevo directamente en la BD
+            form.save()
+            return redirect('product-created')
         else:
             viewData = {}
             viewData["title"] = "Create product"
             viewData["form"] = form
             return render(request, self.template_name, viewData)
-    
+
+
+class ProductListView(ListView):
+    """
+    Vista generica de Django para listar objetos de un modelo.
+    Mas simple que ProductIndexView, Django hace el trabajo automaticamente.
+    """
+
+    model = Product
+    template_name = 'product_list.html'
+    # Nombre de la variable con la que accedemos a los productos en el template
+    context_object_name = 'products'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Products - Online Store'
+        context['subtitle'] = 'List of products'
+        return context
+
+
 class ContactPageView(TemplateView):
     template_name = 'pages/contact.html'
 
