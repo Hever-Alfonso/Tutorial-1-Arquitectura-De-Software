@@ -8,16 +8,20 @@ Este documento describe los comandos necesarios para ejecutar y manejar el proye
 - Contenedor: instancia en ejecucion de una imagen.
 - Contenedores son efimeros: si se recrean, su sistema de archivos interno se pierde.
 - Volumenes: almacenamiento persistente fuera del contenedor.
-- En este proyecto, el volumen guarda la base de datos SQLite.
+- En este proyecto, el volumen guarda la base de datos SQLite en un volumen Docker llamado sqlite_data.
 
-## Entorno Conda
+---
 
-Activar el entorno del proyecto antes de ejecutar cualquier comando:
+## Opcion 1: Correr con Conda (desarrollo local)
+
+### Activar el entorno antes de cualquier comando
+
 ```bash
 conda activate hever_tutorial_2
+cd helloworld
 ```
 
-## Comandos Django
+### Comandos Django (solo con Conda activo)
 
 Aplicar migraciones (crear o actualizar tablas en la base de datos):
 ```bash
@@ -25,7 +29,7 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-Poblar la base de datos con productos de prueba (8 productos aleatorios):
+Poblar la base de datos con 8 productos de prueba:
 ```bash
 python manage.py seed_products
 ```
@@ -42,11 +46,80 @@ python manage.py runserver
 
 Acceder en el navegador: http://127.0.0.1:8000
 
-## Levantar el proyecto con Docker
+---
+
+## Opcion 2: Correr con Docker (recomendado para entregar)
+
+### IMPORTANTE: Docker tiene su propia base de datos separada
+Cuando corres el proyecto con Docker por primera vez, la base de datos del contenedor
+esta vacia. Debes aplicar migraciones y correr el seeder DENTRO del contenedor.
+Esto se hace en una terminal separada mientras el contenedor esta corriendo.
+
+### Paso 1: Levantar el contenedor
+
+Desde la carpeta raiz del proyecto (donde esta docker-compose.yml):
+
 ```bash
 docker compose up --build
 ```
 
-Una vez el contenedor este corriendo, acceder en el navegador:
+Esperar hasta ver este mensaje en la terminal:
+```
+web-1 | Starting development server at http://0.0.0.0:8000/
+```
 
+### Paso 2: Aplicar migraciones (en una segunda terminal)
+
+Abrir una segunda terminal en VS Code (icono + en el panel de terminal) y ejecutar:
+
+```bash
+docker compose exec web python helloworld/manage.py migrate
+```
+
+Resultado esperado: termina con "OK" en cada migracion aplicada.
+
+### Paso 3: Poblar la base de datos con productos de prueba
+
+```bash
+docker compose exec web python helloworld/manage.py seed_products
+```
+
+Resultado esperado: "Successfully seeded products"
+
+### Paso 4: Abrir en el navegador
+
+```
 http://localhost:8000
+```
+
+### Otros comandos utiles con Docker
+
+Correr cualquier comando de Django dentro del contenedor:
+```bash
+docker compose exec web python helloworld/manage.py <comando>
+```
+
+Ver los logs del contenedor en tiempo real:
+```bash
+docker compose logs -f
+```
+
+Detener el contenedor:
+```bash
+docker compose down
+```
+
+Detener el contenedor Y borrar el volumen de la base de datos (reset total):
+```bash
+docker compose down -v
+```
+
+### Nota sobre persistencia con Docker
+
+El volumen sqlite_data guarda la base de datos fuera del contenedor.
+Esto significa que si bajas y vuelves a subir el contenedor con:
+```bash
+docker compose down
+docker compose up --build
+```
+Los datos se conservan. Solo se pierden si usas docker compose down -v.
