@@ -1,16 +1,14 @@
 {% extends 'pages/base.html' %}
-{% block title %} {{title}} {% endblock %}
-{% block header_title %} {{subtitle}} {% endblock %}
+
+{% block title %} Product Created {% endblock %}
+
+{% block header_title %} Product Created {% endblock %}
 
 {% block content %}
+
+<!-- Mensaje de confirmacion que se muestra despues de guardar un producto exitosamente -->
 <div class="alert alert-success" role="alert">
-  Product created
+  Product created successfully. Go to <a href="/products/">Products</a> to see it in the list.
 </div>
 
-<div class="card">
-  <div class="card-body">
-    <p class="card-text"><strong>Name:</strong> {{product.name}}</p>
-    <p class="card-text"><strong>Price:</strong> ${{product.price}}</p>
-  </div>
-</div>
 {% endblock %}

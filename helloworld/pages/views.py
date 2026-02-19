@@ -109,6 +109,14 @@ class ProductCreateView(View):
             return render(request, self.template_name, viewData)
 
 
+class ProductCreatedView(TemplateView):
+    """
+    Vista de confirmacion que se muestra despues de crear un producto exitosamente.
+    Recibe el control despues de que ProductCreateView guarda el producto en la BD.
+    """
+    template_name = 'products/created.html'
+
+
 class ProductListView(ListView):
     """
     Vista generica de Django para listar objetos de un modelo.
