@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -138,3 +139,18 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# ------------------------------------------------------------
+# Media files (imagenes subidas por el usuario)
+# MEDIA_URL: prefijo de la URL publica para acceder a los archivos
+# MEDIA_ROOT: carpeta en el servidor donde se guardan fisicamente
+# ------------------------------------------------------------
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# ------------------------------------------------------------
+# Service Provider para el almacenamiento de imagenes (DIP)
+# Permite cambiar la implementacion concreta sin tocar las vistas.
+# Para usar otro storage (e.g. S3), solo cambia esta linea.
+# ------------------------------------------------------------
+IMAGE_STORAGE_CLASS = 'pages.utils.ImageLocalStorage'
