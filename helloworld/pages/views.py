@@ -10,6 +10,9 @@ from django.core.exceptions import ValidationError
 # Ya no usamos la clase Product con lista hardcodeada
 from .models import Product
 
+# Importamos la implementacion concreta de storage para las vistas de imagen
+from .utils import ImageLocalStorage
+
 
 class HomePageView(TemplateView):
     template_name = 'pages/home.html'
@@ -97,7 +100,7 @@ class ProductCreateView(View):
 
     def post(self, request):
         form = ProductForm(request.POST)
-        if form.is_valid():
+        if form.is_valid():\
             # Antes: no guardaba nada en la BD
             # Ahora: form.save() guarda el producto nuevo directamente en la BD
             form.save()
@@ -160,20 +163,17 @@ class CartView(View):
 
     def get(self, request):
         # Base de datos simulada de productos disponibles
-        # En una app real esto vendria de la BD (e.g. Product.objects.all())
         products = {}
         products[121] = {'name': 'Tv samsung', 'price': '1000'}
         products[11] = {'name': 'Iphone', 'price': '2000'}
 
         # Recuperamos los IDs guardados en sesion y filtramos los productos del carrito
-        # request.session actua como un diccionario persistente entre peticiones
         cart_products = {}
         cart_product_data = request.session.get('cart_product_data', {})
         for key, product in products.items():
             if str(key) in cart_product_data.keys():
                 cart_products[key] = product
 
-        # Preparamos los datos que recibira el template
         view_data = {
             'title': 'Cart - Online Store',
             'subtitle': 'Shopping Cart',
@@ -199,8 +199,7 @@ class CartRemoveAllView(View):
     """
     Vista para vaciar el carrito de compras.
     Elimina la clave 'cart_product_data' de la sesion actual.
-    Solo responde a POST para seguir el patron de seguridad REST
-    (las acciones destructivas no deben hacerse con GET).
+    Solo responde a POST para seguir el patron de seguridad REST.
     """
 
     def post(self, request):
@@ -208,3 +207,61 @@ class CartRemoveAllView(View):
         if 'cart_product_data' in request.session:
             del request.session['cart_product_data']
         return redirect('cart_index')
+
+
+def ImageViewFactory(image_storage):
+    """
+    Factory function que crea una vista de subida de imagenes
+    con la implementacion de storage inyectada como dependencia.
+
+    Esto es INVERSION DE DEPENDENCIAS en accion:
+    - La vista (ImageView) depende de la abstraccion ImageStorage, no de ImageLocalStorage
+    - La implementacion concreta se inyecta desde afuera (en urls.py)
+    - Para cambiar de storage local a S3, solo se cambia el argumento en urls.py
+
+    Retorna la clase ImageView configurada con el storage recibido.
+    """
+    class ImageView(View):
+        template_name = 'images/index.html'
+
+        def get(self, request):
+            # Recuperamos la URL de la imagen guardada en sesion (si existe)
+            image_url = request.session.get('image_url', '')
+            return render(request, self.template_name, {'image_url': image_url})
+
+        def post(self, request):
+            # Delegamos el almacenamiento al objeto inyectado (image_storage)
+            # La vista no sabe ni le importa si guarda en disco, S3 o cualquier otro lugar
+            image_url = image_storage.store(request)
+            request.session['image_url'] = image_url
+            return redirect('image_index')
+
+    return ImageView
+
+
+class ImageViewNoDI(View):
+    """
+    Version de la vista de imagenes SIN inversion de dependencias.
+
+    A diferencia de ImageViewFactory, esta clase instancia directamente
+    ImageLocalStorage() dentro del metodo post().
+
+    Problema: si quisieras cambiar el storage (e.g. a S3), tendrias que
+    modificar esta clase. Viola el principio DIP porque la vista esta
+    acoplada a la implementacion concreta, no a la abstraccion.
+
+    Esta version existe para comparar y entender la diferencia.
+    """
+    template_name = 'imagesnotdi/index.html'
+
+    def get(self, request):
+        image_url = request.session.get('image_url', '')
+        return render(request, self.template_name, {'image_url': image_url})
+
+    def post(self, request):
+        # Aqui esta el problema: creamos la dependencia concreta dentro de la vista
+        # Esto acopla fuertemente la vista a ImageLocalStorage
+        image_storage = ImageLocalStorage()
+        image_url = image_storage.store(request)
+        request.session['image_url'] = image_url
+        return redirect('imagenodi_index')
