@@ -1,19 +1,20 @@
-# Tutorial 2 - Arquitectura de Software (Django)
+# Tutorial 3 - Arquitectura de Software (Django)
 
-Proyecto desarrollado como parte del Taller 2 de Arquitectura de Software, utilizando el framework Django con persistencia real en base de datos, modelos, migraciones, factories y relaciones entre modelos.
+Proyecto desarrollado como parte del Taller 3 de Arquitectura de Software, utilizando el framework Django con soporte de sesiones para un carrito de compras, y dependencias entre modelos.
 
-El proyecto fue construido de manera incremental sobre el Tutorial 1, siguiendo estrictamente las actividades definidas en el documento guia del taller y manteniendo buenas practicas de desarrollo y control de versiones con Git.
+El proyecto fue construido de manera incremental sobre el Tutorial 2, siguiendo estrictamente las actividades definidas en el documento guia del taller y manteniendo buenas practicas de desarrollo y control de versiones con Git.
 
 ---
 
 ## Descripcion del proyecto
 
-La aplicacion representa una tienda en linea que ahora persiste datos realmente en una base de datos SQLite. El objetivo principal es comprender:
+La aplicacion representa una tienda en linea que ya persiste datos realmente en una base de datos SQLite, e incorpora un sistema de carrito de compras usando sesiones de Django. El objetivo principal es comprender:
 
-- La creacion y uso de modelos Django
+- El uso de sesiones en Django para persistir estado entre peticiones
+- Vistas que manejan GET y POST de forma distinta (carrito)
+- La creacion y uso de modelos Django con relaciones
 - El sistema de migraciones
 - El uso de factories y seeders para datos de prueba
-- Las relaciones entre modelos (ForeignKey)
 - El ORM de Django para consultar la base de datos
 - El flujo completo de una aplicacion web con persistencia real
 
@@ -32,11 +33,14 @@ El proyecto sigue el patron MVT (Model - View - Template) de Django:
 - Consultas reales a la base de datos mediante el ORM de Django
 - Formularios basados en ModelForm para guardar directamente en la BD
 - Vistas genericas de Django (ListView)
+- `CartView`: usa `request.session` para almacenar el carrito entre peticiones
+- `CartRemoveAllView`: elimina el carrito de la sesion actual
 
 ### Template
 - Listado de productos desde la base de datos
 - Detalle de producto con comentarios relacionados
 - Formulario de creacion con confirmacion
+- Pagina de carrito de compras con productos disponibles y productos agregados
 
 ---
 
@@ -66,6 +70,8 @@ El proyecto sigue el patron MVT (Model - View - Template) de Django:
 │   │   ├── migrations/
 │   │   ├── static/
 │   │   ├── templates/
+│   │   │   ├── cart/
+│   │   │   │   └── index.html
 │   │   │   ├── pages/
 │   │   │   └── products/
 │   │   ├── factories.py
@@ -92,6 +98,7 @@ El proyecto sigue el patron MVT (Model - View - Template) de Django:
 - Confirmacion de creacion
 - Seeder para poblar la BD con datos de prueba
 - Migraciones de base de datos
+- Carrito de compras con sesiones Django (agregar y vaciar productos)
 
 ---
 
@@ -146,13 +153,13 @@ Acceder en: http://localhost:8000
 
 El proyecto utiliza Git siguiendo buenas practicas:
 
-- Desarrollo en rama `feat/tutorial-02-django-models`
+- Desarrollo en ramas `feat/` por actividad
 - Commits con convencion Conventional Commits
 - Historial limpio y trazable
 
 Ejemplo de commit:
 ```
-feat(pages): add Product model with migration
+feat(pages): add CartView and CartRemoveAllView with session support
 ```
 
 ---
