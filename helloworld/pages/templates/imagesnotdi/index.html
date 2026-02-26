@@ -1,0 +1,36 @@
+{% extends 'pages/base.html' %}
+{% block title %} Image Storage - No DI {% endblock %}
+{% block header_title %} Image Upload (Without Dependency Inversion) {% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">Upload image</div>
+        <div class="card-body">
+          <!-- enctype="multipart/form-data" es obligatorio para subir archivos -->
+          <form action="{% url 'imagenodi_save' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group mb-3">
+              <label>Image:</label>
+              <input type="file" name="profile_image" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+          <!-- Mostramos la imagen si ya fue subida (URL guardada en sesion) -->
+          {% if image_url %}
+            <div class="mt-3">
+              <img src="{{ image_url }}" class="img-fluid" alt="Uploaded image" />
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="mt-3">
+        <a href="{% url 'image_index' %}" class="btn btn-secondary">
+          Ver version con DI
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
