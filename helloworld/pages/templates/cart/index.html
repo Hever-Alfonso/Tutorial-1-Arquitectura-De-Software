@@ -1,0 +1,57 @@
+{% extends 'pages/base.html' %}
+{% block title %} {{title}} {% endblock %}
+{% block header_title %} {{subtitle}} {% endblock %}
+{% block content %}
+<div class="container">
+
+  <!-- Seccion: productos disponibles para agregar al carrito -->
+  <div class="row justify-content-center mb-4">
+    <div class="col-md-12">
+      <h1>Available products</h1>
+      <ul class="list-group">
+        {% for key, product in products.items %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>
+              <strong>Id:</strong> {{ key }} &mdash;
+              <strong>Name:</strong> {{ product.name }} &mdash;
+              <strong>Price:</strong> ${{ product.price }}
+            </span>
+            <!-- Cada boton envia un POST a cart_add con el ID del producto -->
+            <form method="post" action="{% url 'cart_add' key %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-primary">Add to cart</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Seccion: productos actualmente en el carrito (guardados en sesion) -->
+  <div class="row justify-content-center">
+    <div class="col-md-12">
+      <h1>Products in cart</h1>
+      {% if cart_products %}
+        <ul class="list-group mb-3">
+          {% for key, product in cart_products.items %}
+            <li class="list-group-item">
+              <strong>Id:</strong> {{ key }} &mdash;
+              <strong>Name:</strong> {{ product.name }} &mdash;
+              <strong>Price:</strong> ${{ product.price }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted">No products in cart yet.</p>
+      {% endif %}
+
+      <!-- Boton para vaciar el carrito (POST a cart_removeAll) -->
+      <form method="post" action="{% url 'cart_removeAll' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Remove all products from cart</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
