@@ -8,14 +8,13 @@ Este documento describe los comandos necesarios para ejecutar y manejar el proye
 - Contenedor: instancia en ejecucion de una imagen.
 - Contenedores son efimeros: si se recrean, su sistema de archivos interno se pierde.
 - Volumenes: almacenamiento persistente fuera del contenedor.
-- En este proyecto, el volumen guarda la base de datos SQLite en un volumen Docker llamado sqlite_data.
+- En este proyecto, el volumen sqlite_data guarda la base de datos SQLite y el volumen media_data guarda las imagenes subidas por el usuario.
 
 ---
 
 ## Opcion 1: Correr con Conda (desarrollo local)
 
 ### Activar el entorno antes de cualquier comando
-
 ```bash
 conda activate hever_tutorial_2
 cd helloworld
@@ -58,7 +57,6 @@ Esto se hace en una terminal separada mientras el contenedor esta corriendo.
 ### Paso 1: Levantar el contenedor
 
 Desde la carpeta raiz del proyecto (donde esta docker-compose.yml):
-
 ```bash
 docker compose up --build
 ```
@@ -71,7 +69,6 @@ web-1 | Starting development server at http://0.0.0.0:8000/
 ### Paso 2: Aplicar migraciones (en una segunda terminal)
 
 Abrir una segunda terminal en VS Code (icono + en el panel de terminal) y ejecutar:
-
 ```bash
 docker compose exec web python helloworld/manage.py migrate
 ```
@@ -79,7 +76,6 @@ docker compose exec web python helloworld/manage.py migrate
 Resultado esperado: termina con "OK" en cada migracion aplicada.
 
 ### Paso 3: Poblar la base de datos con productos de prueba
-
 ```bash
 docker compose exec web python helloworld/manage.py seed_products
 ```
@@ -87,7 +83,6 @@ docker compose exec web python helloworld/manage.py seed_products
 Resultado esperado: "Successfully seeded products"
 
 ### Paso 4: Abrir en el navegador
-
 ```
 http://localhost:8000
 ```
@@ -109,7 +104,7 @@ Detener el contenedor:
 docker compose down
 ```
 
-Detener el contenedor Y borrar el volumen de la base de datos (reset total):
+Detener el contenedor Y borrar los volumenes (reset total de BD e imagenes):
 ```bash
 docker compose down -v
 ```
@@ -117,9 +112,10 @@ docker compose down -v
 ### Nota sobre persistencia con Docker
 
 El volumen sqlite_data guarda la base de datos fuera del contenedor.
+El volumen media_data guarda las imagenes subidas fuera del contenedor.
 Esto significa que si bajas y vuelves a subir el contenedor con:
 ```bash
 docker compose down
 docker compose up --build
 ```
-Los datos se conservan. Solo se pierden si usas docker compose down -v.
+Los datos y las imagenes se conservan. Solo se pierden si usas docker compose down -v.

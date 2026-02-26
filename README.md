@@ -1,6 +1,6 @@
 # Tutorial 3 - Arquitectura de Software (Django)
 
-Proyecto desarrollado como parte del Taller 3 de Arquitectura de Software, utilizando el framework Django con soporte de sesiones para un carrito de compras, y dependencias entre modelos.
+Proyecto desarrollado como parte del Taller 3 de Arquitectura de Software, utilizando el framework Django con soporte de sesiones para un carrito de compras, subida de imagenes y el Principio de Inversion de Dependencias (DIP).
 
 El proyecto fue construido de manera incremental sobre el Tutorial 2, siguiendo estrictamente las actividades definidas en el documento guia del taller y manteniendo buenas practicas de desarrollo y control de versiones con Git.
 
@@ -8,21 +8,20 @@ El proyecto fue construido de manera incremental sobre el Tutorial 2, siguiendo 
 
 ## Descripcion del proyecto
 
-La aplicacion representa una tienda en linea que ya persiste datos realmente en una base de datos SQLite, e incorpora un sistema de carrito de compras usando sesiones de Django. El objetivo principal es comprender:
+La aplicacion representa una tienda en linea que persiste datos en SQLite, maneja sesiones para el carrito de compras y demuestra el Principio de Inversion de Dependencias (DIP) a traves de un sistema de subida de imagenes con y sin DI. El objetivo principal es comprender:
 
 - El uso de sesiones en Django para persistir estado entre peticiones
-- Vistas que manejan GET y POST de forma distinta (carrito)
-- La creacion y uso de modelos Django con relaciones
-- El sistema de migraciones
-- El uso de factories y seeders para datos de prueba
-- El ORM de Django para consultar la base de datos
-- El flujo completo de una aplicacion web con persistencia real
+- El Principio de Inversion de Dependencias (DIP) en una aplicacion real
+- La diferencia practica entre una arquitectura con y sin DI
+- La inyeccion de dependencias desde urls.py usando factory functions
+- Clases abstractas en Python (ABC) como interfaces
+- Almacenamiento de archivos con el sistema de media de Django
 
 ---
 
-## Arquitectura aplicada (MVT)
+## Arquitectura aplicada (MVT + DIP)
 
-El proyecto sigue el patron MVT (Model - View - Template) de Django:
+El proyecto sigue el patron MVT (Model - View - Template) de Django e incorpora el Principio de Inversion de Dependencias:
 
 ### Model
 - Modelo `Product` con campos: name, price, created_at, updated_at
@@ -32,15 +31,24 @@ El proyecto sigue el patron MVT (Model - View - Template) de Django:
 ### View
 - Consultas reales a la base de datos mediante el ORM de Django
 - Formularios basados en ModelForm para guardar directamente en la BD
-- Vistas genericas de Django (ListView)
 - `CartView`: usa `request.session` para almacenar el carrito entre peticiones
 - `CartRemoveAllView`: elimina el carrito de la sesion actual
+- `ImageViewFactory`: factory function que inyecta el storage como dependencia (DIP)
+- `ImageViewNoDI`: misma funcionalidad pero con acoplamiento directo (sin DIP)
 
 ### Template
 - Listado de productos desde la base de datos
 - Detalle de producto con comentarios relacionados
 - Formulario de creacion con confirmacion
-- Pagina de carrito de compras con productos disponibles y productos agregados
+- Pagina de carrito de compras
+- Pagina de subida de imagenes (con y sin DI)
+
+### DIP - Inversion de Dependencias
+- `interfaces.py`: define `ImageStorage` como clase abstracta (el contrato)
+- `utils.py`: implementa `ImageLocalStorage` que hereda de `ImageStorage`
+- `apps.py`: service provider que carga la clase configurada al arrancar
+- `settings.py`: `IMAGE_STORAGE_CLASS` permite cambiar la implementacion sin tocar vistas
+- `urls.py`: inyecta `ImageLocalStorage()` al crear las vistas (inyeccion de dependencias)
 
 ---
 
@@ -55,6 +63,7 @@ El proyecto sigue el patron MVT (Model - View - Template) de Django:
 - SQLite
 - Git y GitHub
 - Conda (entorno virtual)
+- Docker y Docker Compose
 
 ---
 
@@ -63,6 +72,7 @@ El proyecto sigue el patron MVT (Model - View - Template) de Django:
 .
 ├── helloworld/
 │   ├── helloworld_project/
+│   ├── media/                    # Imagenes subidas (persistidas con volumen Docker)
 │   ├── pages/
 │   │   ├── management/
 │   │   │   └── commands/
@@ -72,11 +82,17 @@ El proyecto sigue el patron MVT (Model - View - Template) de Django:
 │   │   ├── templates/
 │   │   │   ├── cart/
 │   │   │   │   └── index.html
+│   │   │   ├── images/
+│   │   │   │   └── index.html
+│   │   │   ├── imagesnotdi/
+│   │   │   │   └── index.html
 │   │   │   ├── pages/
 │   │   │   └── products/
 │   │   ├── factories.py
+│   │   ├── interfaces.py         # Interfaz abstracta ImageStorage (DIP)
 │   │   ├── models.py
 │   │   ├── urls.py
+│   │   ├── utils.py              # Implementacion concreta ImageLocalStorage
 │   │   └── views.py
 │   └── manage.py
 ├── .gitignore
@@ -95,10 +111,10 @@ El proyecto sigue el patron MVT (Model - View - Template) de Django:
 - Detalle de producto con precio condicional (rojo si supera 2000)
 - Comentarios relacionados al producto
 - Creacion de productos mediante formulario con persistencia en BD
-- Confirmacion de creacion
 - Seeder para poblar la BD con datos de prueba
-- Migraciones de base de datos
 - Carrito de compras con sesiones Django (agregar y vaciar productos)
+- Subida de imagenes con Inversion de Dependencias (DIP)
+- Subida de imagenes sin DI (para comparacion y entendimiento del principio)
 
 ---
 
@@ -145,6 +161,12 @@ http://127.0.0.1:8000/
 docker compose up --build
 ```
 
+En una segunda terminal:
+```bash
+docker compose exec web python helloworld/manage.py migrate
+docker compose exec web python helloworld/manage.py seed_products
+```
+
 Acceder en: http://localhost:8000
 
 ---
@@ -159,7 +181,7 @@ El proyecto utiliza Git siguiendo buenas practicas:
 
 Ejemplo de commit:
 ```
-feat(pages): add CartView and CartRemoveAllView with session support
+feat(pages): add ImageViewFactory with DI and ImageViewNoDI for comparison
 ```
 
 ---
