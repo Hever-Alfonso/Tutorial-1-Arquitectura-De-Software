@@ -1,5 +1,8 @@
 asgiref==3.11.0
 Django==5.2
+# Django REST Framework: libreria para construir APIs REST en Django.
+# Provee serializers, vistas genericas, autenticacion por token, y mas.
+djangorestframework==3.16.1
 factory-boy==3.2.0
 Faker==37.3.0
 sqlparse==0.5.2
