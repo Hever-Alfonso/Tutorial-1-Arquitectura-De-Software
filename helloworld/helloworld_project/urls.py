@@ -22,6 +22,10 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('pages.urls')),
+    # include('api.urls') delega todas las URLs que empiecen con /api/
+    # a las rutas definidas en api/urls.py.
+    # Las vistas MVT existentes de pages/ NO se tocan.
+    path('api/', include('api.urls')),
 ]
 
 # En modo DEBUG, Django sirve los archivos media (imagenes subidas)
